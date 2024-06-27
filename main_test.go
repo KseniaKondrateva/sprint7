@@ -39,7 +39,7 @@ func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 	body := responseRecorder.Body.String()
 	list := strings.Split(body, ",")
 	assert.Len(t, list, totalCount)
-	assert.Equal(t, expectedAnswer, body)
+	assert.Equal(t, expectedAnswer, list)
 }
 
 func TestMainHandlerWhenInvalidCity(t *testing.T) {
