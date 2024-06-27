@@ -11,38 +11,43 @@ import (
 )
 
 func TestMainHandlerWhenCorrectRequest(t *testing.T) {
-
+	expectedAnswer := []string{"Мир кофе, Сладкоежка, Кофе и завтраки, Сытый студент"}
 	req := httptest.NewRequest("GET", "/cafe?count=4&city=moscow", nil)
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
 	handler.ServeHTTP(responseRecorder, req)
 
-	assert.Equal(t, http.StatusOK, responseRecorder.Code, "expected status code: %d, got %d", http.StatusOK, responseRecorder.Code)
+	require.Equal(t, http.StatusOK, responseRecorder.Code)
 
 	body := responseRecorder.Body.String()
-	assert.NotEmpty(t, body, "expected a non-empty response body")
+	list := strings.Split(body, ",")
+
+	assert.NotEmpty(t, body)
+	assert.Equal(t, expectedAnswer, list)
 }
+
 func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 	totalCount := 4
+	expectedAnswer := []string{"Мир кофе, Сладкоежка, Кофе и завтраки, Сытый студент"}
 
 	req := httptest.NewRequest("GET", "/cafe?count=10&city=moscow", nil) // здесь нужно создать запрос к сервису
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
 	handler.ServeHTTP(responseRecorder, req)
-	assert.Equal(t, http.StatusOK, responseRecorder.Code, "expected status code: %d, got %d", http.StatusOK, responseRecorder.Code)
+	require.Equal(t, http.StatusOK, responseRecorder.Code)
 
 	body := responseRecorder.Body.String()
 	list := strings.Split(body, ",")
-	assert.Len(t, list, totalCount, "expected cafe count: %d, got %d", totalCount, len(list))
+	assert.Len(t, list, totalCount)
+	assert.Equal(t, expectedAnswer, body)
 }
-func TestMainHandlerWhenInvalidCity(t *testing.T) {
 
+func TestMainHandlerWhenInvalidCity(t *testing.T) {
 	req := httptest.NewRequest("GET", "/cafe?count=4&city=ivanovo", nil)
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
 	handler.ServeHTTP(responseRecorder, req)
 
-	assert.Equal(t, http.StatusBadRequest, responseRecorder.Code, "expected status code: %d, got %d", http.StatusBadRequest, responseRecorder.Code)
-
-	require.Equal(t, "wrong city value", responseRecorder.Body.String())
+	require.Equal(t, http.StatusBadRequest, responseRecorder.Code)
+	assert.Equal(t, "wrong city value", responseRecorder.Body.String())
 }
